@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+</head>
+<body>
+    <h1>三级联动</h1>
+    <select class="lv1" style="width:200px"></select>
+    <select class="lv2" style="width:200px"></select>
+    <select class="lv3" style="width:200px"></select>
+    <script>
+        function getjson(jsonurl,callback){
+            $.ajax({
+                type:"get",
+                url:jsonurl,
+                async:true,
+                dataType:"json",
+                success:callback
+            })
+        }
+        function createnode(node,len,dataId,dataName){
+            console.log(data);
+            for(let i=0;i<len;i++){
+                node+="<option value='"+dataId+"'>"+dataName+"</option>";
+            }
+        }
+
+        //默认输出
+        getjson("/json",function(data){
+                console.log(data.result);
+                //默认第一级
+                var len1=data.result[0].length;
+                var html1;
+                for(let i=0;i<len1;i++){
+                    html1+="<option value='"+data.result[0][i].id+"'>"+data.result[0][i].fullname+"</option>";
+                }
+                // createnode(html1,len1,data.result[0][i].id,data.result[0][i].fullname);
+                $(".lv1").html(html1);
+                
+                //默认第二级
+                getjson("/json/110000",function(data){
+                    var len2=data.result[0].length;
+                    var html2;
+                    for(let i=0;i<len2;i++){
+                        html2+="<option value='"+data.result[0][i].id+"'>"+data.result[0][i].fullname+"</option>";
+                    }
+                    $(".lv2").html(html2);
+
+                    //默认第三级
+                    getjson("/json/110101",function(data){
+                        var len3=data.result[0].length;
+                        var html3;
+                        for(let i=0;i<len3;i++){
+                            html3+="<option value='"+data.result[0][i].id+"'>"+data.result[0][i].fullname+"</option>";
+                        }
+                        $(".lv3").html(html3);
+                    })
+                })
+        })
+
+
+         //选择第一级后变换第二集
+         $(".lv1").change(function(){
+            var cityid=$(this).val();
+            getjson("/json/"+cityid,function(data){
+                var len2=data.result[0].length;
+                var html2;
+                for(let i=0;i<len2;i++){
+                    html2+="<option value='"+data.result[0][i].id+"'>"+data.result[0][i].fullname+"</option>";
+                }
+                $(".lv2").html(html2);
+                //变换第三级
+                getjson("/json/"+data.result[0][0].id,function(data){
+                    var len3=data.result[0].length;
+                    var html3;
+                    for(let i=0;i<len3;i++){
+                        html3+="<option value='"+data.result[0][i].id+"'>"+data.result[0][i].fullname+"</option>";
+                    }
+                    $(".lv3").html(html3);
+                })
+            })
+        })
+
+        //变换第二级时变换第三级
+        $(".lv2").change(function(){
+            var cityid=$(this).val();
+            getjson("/json/"+cityid,function(data){
+                var len3=data.result[0].length;
+                var html3;
+                for(let i=0;i<len3;i++){
+                    html3+="<option value='"+data.result[0][i].id+"'>"+data.result[0][i].fullname+"</option>";
+                }
+                $(".lv3").html(html3);
+            })
+        })
+    </script>
+</body>
+</html>
